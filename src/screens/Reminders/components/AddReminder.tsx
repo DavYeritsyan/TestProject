@@ -47,14 +47,12 @@ const AddReminder = () => {
 
   return (
     <>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.addFab}
-          onPress={() => setModalVisible(true)}
-          activeOpacity={0.8}>
-          <Text style={styles.addFabText}>+</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => setModalVisible(true)}
+        activeOpacity={0.8}>
+        <Text style={styles.addButtonText}>+</Text>
+      </TouchableOpacity>
 
       <Modal
         visible={modalVisible}
@@ -115,29 +113,24 @@ const AddReminder = () => {
 };
 
 const styles = StyleSheet.create({
-  header: {
-    alignItems: 'flex-end',
-    padding: 20,
-    paddingTop: 12,
-  },
-  addFab: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+  addButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: '#6366F1',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowRadius: 6,
+    elevation: 5,
   },
-  addFabText: {
-    fontSize: 32,
+  addButtonText: {
+    fontSize: 28,
     color: '#FFFFFF',
     fontWeight: '300',
-    lineHeight: 32,
+    lineHeight: 28,
   },
   modalOverlay: {
     flex: 1,
