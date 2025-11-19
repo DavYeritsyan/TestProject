@@ -1,38 +1,29 @@
-import { useState } from 'react';
-import auth from '@react-native-firebase/auth';
-import { getAuthErrorMessage } from '../constants/authErrors';
+import { useAuthStore } from '../stores/authStore';
+import { useNavigation } from '@react-navigation/native';
+import { RegistrationScreenNavigationProp } from '../screens/Registration/types';
 
 export const useRegisteration = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const navigation = useNavigation<RegistrationScreenNavigationProp>();
+  const { 
+    register, 
+    loading, 
+    error, 
+    success, 
+    clearError, 
+    resetSuccess 
+  } = useAuthStore();
 
-  const registeration = async (email: string, password: string) => {
-    setLoading(true);
-    setError(null);
-    setSuccess(false);
-    
-    try {
-      await auth().createUserWithEmailAndPassword(email, password);
-      setSuccess(true);
-      return { success: true };
-    } catch (err: any) {
-      const errorMessage = getAuthErrorMessage(err.code);
-      setError(errorMessage);
-      setLoading(false);
-      return { success: false, error: errorMessage };
-    }
+  const onNavigateToLogin = () => {
+    navigation.navigate('LoginScreen');
   };
 
-  const clearError = () => setError(null);
-  const resetSuccess = () => setSuccess(false);
-
   return {
-    registeration,
+    registeration: register,
     loading,
     error,
     success,
     clearError,
     resetSuccess,
+    onNavigateToLogin,
   };
 };

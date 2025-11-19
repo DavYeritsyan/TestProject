@@ -1,32 +1,18 @@
-import { useState } from 'react';
-import auth from '@react-native-firebase/auth';
-import { getAuthErrorMessage } from '../constants/authErrors';
+import { LoginScreenNavigationProp } from '../screens/Login/types';
+import { useAuthStore } from '../stores/authStore';
+import { useNavigation } from '@react-navigation/native';
 
 export const useLogin = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const login = async (email: string, password: string) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      await auth().signInWithEmailAndPassword(email, password);
-      return { success: true };
-    } catch (err: any) {
-      const errorMessage = getAuthErrorMessage(err.code);
-      setError(errorMessage);
-      setLoading(false);
-      return { success: false, error: errorMessage };
-    }
+  const { login, loading, error, clearError } = useAuthStore();
+  const navigation = useNavigation<LoginScreenNavigationProp>();
+ const onNavigateToSignUp = () => {
+    navigation.navigate('RegistrationScreen');
   };
-
-  const clearError = () => setError(null);
-
   return {
     login,
     loading,
     error,
     clearError,
+    onNavigateToSignUp,
   };
 };

@@ -14,13 +14,9 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { signupSchema, SignupFormData } from '../../validation/authSchemas';
 import { useRegisteration } from '../../hooks';
 import { FormInput, PasswordInput } from '../../components';
-import { useNavigation } from '@react-navigation/native';
-import { RegistrationScreenNavigationProp } from './types';
-
 
 const RegistrationScreen: React.FC = () => {
-  const { registeration, loading, error, success, clearError } = useRegisteration();
-  const navigation = useNavigation<RegistrationScreenNavigationProp>();
+  const { registeration, loading, error, success, clearError, onNavigateToLogin } = useRegisteration();
   const {
     control,
     handleSubmit,
@@ -30,10 +26,6 @@ const RegistrationScreen: React.FC = () => {
     resolver: yupResolver(signupSchema),
     mode: 'onBlur',
   });
-
-  const onNavigateToLogin = () => {
-    navigation.navigate('LoginScreen');
-  };
 
   useEffect(() => {
     if (error) {

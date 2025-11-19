@@ -2,38 +2,41 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import TodoListScreen from '../screens/ToDoList';
 import RemindersScreen from '../screens/Reminders';
-import { Text, TouchableOpacity, Alert } from 'react-native';
+import { Text, TouchableOpacity, Alert, View, StyleSheet } from 'react-native';
 import auth from '@react-native-firebase/auth';
+import { TaskIcon } from '../asstets/icons/TaskIcon';
+import { ReminderIcon } from '../asstets/icons/ReminderIcon';
 
 const Tab = createBottomTabNavigator();
 
 const AppNavigator = () => {
   const handleLogout = () => {
-    console.log('Logout button pressed');
     Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
+      '👋 Logout',
+      'Are you sure you want to log out?\nYou can always come back anytime!',
       [
         {
-          text: 'Cancel',
+          text: 'Stay',
           style: 'cancel',
-          onPress: () => console.log('Logout cancelled'),
         },
         {
           text: 'Logout',
           style: 'destructive',
           onPress: async () => {
-            console.log('Starting logout...');
             try {
               await auth().signOut();
-              console.log('Logout successful');
             } catch (error) {
               console.error('Error signing out:', error);
-              Alert.alert('Error', 'Failed to logout. Please try again.');
+              Alert.alert(
+                '⚠️ Oops!',
+                'Something went wrong while logging out.\nPlease check your connection and try again.',
+                [{ text: 'Got it', style: 'default' }]
+              );
             }
           },
         },
       ],
+      { cancelable: true }
     );
   };
 
@@ -48,12 +51,8 @@ const AppNavigator = () => {
           fontWeight: 'bold',
         },
         headerRight: () => (
-          <TouchableOpacity
-            onPress={handleLogout}
-            style={{ marginRight: 16 }}>
-            <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>
-              Logout
-            </Text>
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+            <Text style={styles.logoutText}>Logout</Text>
           </TouchableOpacity>
         ),
         tabBarActiveTintColor: '#007AFF',
@@ -68,10 +67,8 @@ const AppNavigator = () => {
         component={TodoListScreen}
         options={{
           title: 'To-Do List',
-          tabBarLabel: 'To-Do List',
-          tabBarIcon: ({ color }) => (
-            <Text style={{ fontSize: 24, color }}>✓</Text>
-          ),
+          tabBarLabel: 'Tasks',
+          tabBarIcon: ({ color }) => <TaskIcon color={color} />,
         }}
       />
       <Tab.Screen
@@ -80,13 +77,22 @@ const AppNavigator = () => {
         options={{
           title: 'Reminders',
           tabBarLabel: 'Reminders',
-          tabBarIcon: ({ color }) => (
-            <Text style={{ fontSize: 24, color }}>🔔</Text>
-          ),
+          tabBarIcon: ({ color }) => <ReminderIcon color={color} />,
         }}
       />
     </Tab.Navigator>
   );
 };
+
+const styles = StyleSheet.create({
+  logoutButton: {
+    marginRight: 16,
+  },
+  logoutText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});
 
 export default AppNavigator;
