@@ -3,13 +3,15 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import TodoListScreen from '../screens/ToDoList';
 import RemindersScreen from '../screens/Reminders';
 import { Text, TouchableOpacity, Alert, View, StyleSheet } from 'react-native';
-import auth from '@react-native-firebase/auth';
 import { TaskIcon } from '../asstets/icons/TaskIcon';
 import { ReminderIcon } from '../asstets/icons/ReminderIcon';
+import { useAuthStore } from '../stores/authStore';
 
 const Tab = createBottomTabNavigator();
 
 const AppNavigator = () => {
+  const { logout } = useAuthStore();
+
   const handleLogout = () => {
     Alert.alert(
       '👋 Logout',
@@ -24,7 +26,7 @@ const AppNavigator = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              await auth().signOut();
+              await logout();
             } catch (error) {
               console.error('Error signing out:', error);
               Alert.alert(
