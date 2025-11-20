@@ -30,7 +30,6 @@ const RemindersScreen = () => {
               <AddReminder />
             </View>
 
-            {/* Statistics Cards */}
             {reminders.length > 0 && (
               <View style={styles.statsContainer}>
                 <View style={[styles.statCard, styles.statCardTotal]}>
@@ -48,7 +47,6 @@ const RemindersScreen = () => {
               </View>
             )}
 
-            {/* Search Bar */}
             {reminders.length > 0 && (
               <View style={styles.searchContainer}>
                 <Text style={styles.searchIcon}>🔍</Text>

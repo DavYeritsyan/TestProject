@@ -8,10 +8,7 @@ const TodoListScreen = () => {
 
   return (
     <View style={styles.container}>
-
-
       <AddTodo />
-
       {todos.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyIcon}>📝</Text>
