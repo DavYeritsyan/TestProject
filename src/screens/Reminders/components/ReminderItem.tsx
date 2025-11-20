@@ -2,13 +2,25 @@ import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { ReminderItem as ReminderItemType } from '../../../types';
 import { useReminders } from '../../../hooks';
+import { CATEGORIES, DEFAULT_CATEGORY } from '../../../constants';
 
 interface ReminderItemProps {
   item: ReminderItemType;
 }
 
+const detectCategory = (title: string, description: string) => {
+  const text = (title + ' ' + description).toLowerCase();
+  
+  const category = CATEGORIES.find(cat => 
+    cat.keywords.some(keyword => text.includes(keyword))
+  );
+  
+  return category || DEFAULT_CATEGORY;
+};
+
 const ReminderItem: React.FC<ReminderItemProps> = ({ item }) => {
   const { deleteReminder, error, clearError } = useReminders();
+  const category = detectCategory(item.title, item.description);
 
   useEffect(() => {
     if (error) {
@@ -18,95 +30,149 @@ const ReminderItem: React.FC<ReminderItemProps> = ({ item }) => {
     }
   }, [error, clearError]);
 
-  const handleDelete = async () => {
-    await deleteReminder(item.id);
+  const handleDelete = () => {
+    Alert.alert(
+      'Delete Reminder',
+      'Are you sure you want to delete this reminder?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive',
+          onPress: async () => await deleteReminder(item.id)
+        },
+      ]
+    );
   };
 
   return (
-    <View style={styles.reminderItem}>
-      <View style={styles.reminderContent}>
-        <View style={styles.iconContainer}>
-          <Text style={styles.icon}>📌</Text>
-        </View>
-        <View style={styles.textContainer}>
-          <Text style={styles.reminderTitle}>{item.title}</Text>
-          {item.description ? (
-            <Text style={styles.reminderDescription}>{item.description}</Text>
-          ) : null}
+    <View style={[styles.reminderItem, { borderLeftColor: category.color }]}>
+      <View style={styles.topRow}>
+        <View style={[styles.categoryBadge, { backgroundColor: category.bg }]}>
+          <Text style={styles.categoryIcon}>{category.icon}</Text>
+          <Text style={[styles.categoryText, { color: category.color }]}>
+            {category.label}
+          </Text>
         </View>
       </View>
-      <TouchableOpacity 
-        style={styles.deleteButton} 
-        onPress={handleDelete}
-        activeOpacity={0.7}>
-        <Text style={styles.deleteButtonText}>×</Text>
-      </TouchableOpacity>
+      
+      <View style={styles.content}>
+        <Text style={styles.reminderTitle}>{item.title}</Text>
+        {item.description ? (
+          <Text style={styles.reminderDescription} numberOfLines={2}>
+            {item.description}
+          </Text>
+        ) : null}
+      </View>
+
+      <View style={styles.bottomRow}>
+        <View style={styles.priorityIndicator}>
+          {category.label === 'Urgent' && (
+            <>
+              <View style={[styles.dot, styles.dotUrgent]} />
+              <Text style={styles.priorityText}>High Priority</Text>
+            </>
+          )}
+        </View>
+        <TouchableOpacity 
+          style={styles.deleteButton} 
+          onPress={handleDelete}
+          activeOpacity={0.7}>
+          <Text style={styles.deleteButtonText}>×</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   reminderItem: {
-    flexDirection: 'row',
     backgroundColor: '#FFFFFF',
-    padding: 18,
+    padding: 16,
     borderRadius: 16,
     marginBottom: 12,
-    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
+    borderLeftWidth: 4,
     borderWidth: 1,
     borderColor: '#F3F4F6',
   },
-  reminderContent: {
-    flex: 1,
+  topRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    paddingRight: 12,
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#EEF2FF',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
+    marginBottom: 12,
   },
-  icon: {
-    fontSize: 20,
+  categoryBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    gap: 6,
   },
-  textContainer: {
-    flex: 1,
+  categoryIcon: {
+    fontSize: 14,
+  },
+  categoryText: {
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
+  content: {
+    marginBottom: 12,
   },
   reminderTitle: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
     color: '#1F2937',
-    marginBottom: 4,
-    lineHeight: 22,
+    marginBottom: 6,
+    lineHeight: 24,
   },
   reminderDescription: {
     fontSize: 14,
     color: '#6B7280',
     lineHeight: 20,
   },
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  priorityIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  dotUrgent: {
+    backgroundColor: '#EF4444',
+  },
+  priorityText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#EF4444',
+  },
   deleteButton: {
     backgroundColor: '#FEE2E2',
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
   },
   deleteButtonText: {
-    fontSize: 28,
+    fontSize: 24,
     color: '#EF4444',
-    fontWeight: '300',
-    lineHeight: 28,
+    fontWeight: '400',
+    lineHeight: 24,
   },
 });
 

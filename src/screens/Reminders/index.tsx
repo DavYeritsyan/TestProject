@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, FlatList, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { AddReminder } from './components';
-import EnhancedReminderItem from './components/EnhancedReminderItem';
+import ReminderItem from './components/ReminderItem';
 import { useReminders } from '../../hooks';
 
 const RemindersScreen = () => {
@@ -60,7 +60,6 @@ const RemindersScreen = () => {
           </View>
         )}
 
-        {/* Filter Chips */}
         {reminders.length > 0 && (
           <View style={styles.filtersContainer}>
             {(['all', 'work', 'personal', 'urgent'] as const).map(filter => (
@@ -108,7 +107,7 @@ const RemindersScreen = () => {
           <FlatList
             data={filteredReminders}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <EnhancedReminderItem item={item} />}
+            renderItem={({ item }) => <ReminderItem item={item} />}
             contentContainerStyle={styles.listContainer}
             showsVerticalScrollIndicator={false}
           />
