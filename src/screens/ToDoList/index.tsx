@@ -1,15 +1,17 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
 import { AddTodo, TodoItem } from './components';
 import { useTodo } from '../../hooks';
 
 const TodoListScreen = () => {
-  const { todos } = useTodo();
+  const { todos, loading } = useTodo();
 
   return (
     <View style={styles.container}>
+
+
       <AddTodo />
-      
+
       {todos.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyIcon}>📝</Text>
@@ -17,13 +19,21 @@ const TodoListScreen = () => {
           <Text style={styles.emptySubtext}>Create your first task to get started</Text>
         </View>
       ) : (
-        <FlatList
-          data={todos}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <TodoItem item={item} />}
-          contentContainerStyle={styles.listContainer}
-          showsVerticalScrollIndicator={false}
-        />
+        <>
+          {loading ? (
+            <View >
+              <ActivityIndicator size="large" />
+            </View>
+          ) : (
+            <FlatList
+              data={todos}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => <TodoItem item={item} />}
+              contentContainerStyle={styles.listContainer}
+              showsVerticalScrollIndicator={false}
+            />
+          )}
+        </>
       )}
     </View>
   );

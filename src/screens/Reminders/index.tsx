@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { AddReminder } from './components';
 import ReminderItem from './components/ReminderItem';
 import { useReminders } from '../../hooks';
@@ -13,104 +13,114 @@ const RemindersScreen = () => {
     setSearchQuery,
     selectedFilter,
     setSelectedFilter,
+    loading
   } = useReminders();
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerSection}>
-        <View style={styles.titleRow}>
-          <Text style={styles.screenTitle}>My Reminders</Text>
-          <AddReminder />
-        </View>
-
-        {/* Statistics Cards */}
-        {reminders.length > 0 && (
-          <View style={styles.statsContainer}>
-            <View style={[styles.statCard, styles.statCardTotal]}>
-              <Text style={styles.statNumber}>{stats.total}</Text>
-              <Text style={styles.statLabel}>Total</Text>
-            </View>
-            <View style={[styles.statCard, styles.statCardWork]}>
-              <Text style={styles.statNumber}>{stats.work}</Text>
-              <Text style={styles.statLabel}>Work</Text>
-            </View>
-            <View style={[styles.statCard, styles.statCardPersonal]}>
-              <Text style={styles.statNumber}>{stats.personal}</Text>
-              <Text style={styles.statLabel}>Personal</Text>
-            </View>
-          </View>
-        )}
-
-        {/* Search Bar */}
-        {reminders.length > 0 && (
-          <View style={styles.searchContainer}>
-            <Text style={styles.searchIcon}>🔍</Text>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search reminders..."
-              placeholderTextColor="#9CA3AF"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-            {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <Text style={styles.clearButton}>✕</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        )}
-
-        {reminders.length > 0 && (
-          <View style={styles.filtersContainer}>
-            {(['all', 'work', 'personal', 'urgent'] as const).map(filter => (
-              <TouchableOpacity
-                key={filter}
-                style={[
-                  styles.filterChip,
-                  selectedFilter === filter && styles.filterChipActive
-                ]}
-                onPress={() => setSelectedFilter(filter)}>
-                <Text style={[
-                  styles.filterChipText,
-                  selectedFilter === filter && styles.filterChipTextActive
-                ]}>
-                  {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-      </View>
-      
-      {filteredReminders.length === 0 && reminders.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>📝</Text>
-          <Text style={styles.emptyText}>No reminders yet</Text>
-          <Text style={styles.emptySubtext}>Create your first reminder to get started!</Text>
-          <View style={styles.emptyTips}>
-            <Text style={styles.tipText}>💡 Tip: Use keywords like "work", "urgent", or "personal"</Text>
-          </View>
-        </View>
-      ) : filteredReminders.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>🔍</Text>
-          <Text style={styles.emptyText}>No matches found</Text>
-          <Text style={styles.emptySubtext}>Try adjusting your search or filters</Text>
+      {loading ? (
+        <View >
+          <ActivityIndicator size="large" />
         </View>
       ) : (
         <>
-          <View style={styles.resultsHeader}>
-            <Text style={styles.resultsText}>
-              {filteredReminders.length} {filteredReminders.length === 1 ? 'reminder' : 'reminders'}
-            </Text>
+          <View style={styles.headerSection}>
+            <View style={styles.titleRow}>
+              <Text style={styles.screenTitle}>My Reminders</Text>
+              <AddReminder />
+            </View>
+
+            {/* Statistics Cards */}
+            {reminders.length > 0 && (
+              <View style={styles.statsContainer}>
+                <View style={[styles.statCard, styles.statCardTotal]}>
+                  <Text style={styles.statNumber}>{stats.total}</Text>
+                  <Text style={styles.statLabel}>Total</Text>
+                </View>
+                <View style={[styles.statCard, styles.statCardWork]}>
+                  <Text style={styles.statNumber}>{stats.work}</Text>
+                  <Text style={styles.statLabel}>Work</Text>
+                </View>
+                <View style={[styles.statCard, styles.statCardPersonal]}>
+                  <Text style={styles.statNumber}>{stats.personal}</Text>
+                  <Text style={styles.statLabel}>Personal</Text>
+                </View>
+              </View>
+            )}
+
+            {/* Search Bar */}
+            {reminders.length > 0 && (
+              <View style={styles.searchContainer}>
+                <Text style={styles.searchIcon}>🔍</Text>
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search reminders..."
+                  placeholderTextColor="#9CA3AF"
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+                {searchQuery.length > 0 && (
+                  <TouchableOpacity onPress={() => setSearchQuery('')}>
+                    <Text style={styles.clearButton}>✕</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
+
+            {reminders.length > 0 && (
+              <View style={styles.filtersContainer}>
+                {(['all', 'work', 'personal', 'urgent'] as const).map(filter => (
+                  <TouchableOpacity
+                    key={filter}
+                    style={[
+                      styles.filterChip,
+                      selectedFilter === filter && styles.filterChipActive
+                    ]}
+                    onPress={() => setSelectedFilter(filter)}>
+                    <Text style={[
+                      styles.filterChipText,
+                      selectedFilter === filter && styles.filterChipTextActive
+                    ]}>
+                      {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
           </View>
-          <FlatList
-            data={filteredReminders}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <ReminderItem item={item} />}
-            contentContainerStyle={styles.listContainer}
-            showsVerticalScrollIndicator={false}
-          />
+
+          {filteredReminders.length === 0 && reminders.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyIcon}>📝</Text>
+              <Text style={styles.emptyText}>No reminders yet</Text>
+              <Text style={styles.emptySubtext}>Create your first reminder to get started!</Text>
+              <View style={styles.emptyTips}>
+                <Text style={styles.tipText}>💡 Tip: Use keywords like "work", "urgent", or "personal"</Text>
+              </View>
+            </View>
+          ) : filteredReminders.length === 0 ? (
+
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyIcon}>🔍</Text>
+              <Text style={styles.emptyText}>No matches found</Text>
+              <Text style={styles.emptySubtext}>Try adjusting your search or filters</Text>
+            </View>
+          ) : (
+            <>
+              <View style={styles.resultsHeader}>
+                <Text style={styles.resultsText}>
+                  {filteredReminders.length} {filteredReminders.length === 1 ? 'reminder' : 'reminders'}
+                </Text>
+              </View>
+              <FlatList
+                data={filteredReminders}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => <ReminderItem item={item} />}
+                contentContainerStyle={styles.listContainer}
+                showsVerticalScrollIndicator={false}
+              />
+            </>
+          )}
         </>
       )}
     </View>

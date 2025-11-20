@@ -113,12 +113,6 @@ const RegistrationScreen: React.FC = () => {
             </View>
           )}
 
-          {success && (
-            <View style={styles.successContainer}>
-              <Text style={styles.successBanner}>✅ Account created successfully!</Text>
-            </View>
-          )}
-
           <TouchableOpacity
             style={[styles.button, loading && styles.buttonDisabled]}
             onPress={handleSubmit(onSubmit)}
