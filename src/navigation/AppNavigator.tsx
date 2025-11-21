@@ -28,7 +28,6 @@ const AppNavigator = () => {
             try {
               await logout();
             } catch (error) {
-              console.error('Error signing out:', error);
               Alert.alert(
                 'Oops!',
                 'Something went wrong while logging out.\nPlease check your connection and try again.',

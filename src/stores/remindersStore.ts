@@ -129,7 +129,6 @@ export const useRemindersStore = create<RemindersState>((set, get) => ({
           set({ reminders: remindersData });
         },
         (err) => {
-          console.error('Error fetching reminders:', err);
           set({ error: 'Failed to fetch reminders' });
         }
       );

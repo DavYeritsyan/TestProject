@@ -41,12 +41,10 @@ class NotificationService {
     try {
       const hasPermission = await this.requestPermissions();
       if (!hasPermission) {
-        console.warn('Notification permission denied');
         return;
       }
 
       if (timestamp <= Date.now()) {
-        console.warn('Cannot schedule notification in the past');
         return;
       }
 
@@ -82,10 +80,7 @@ class NotificationService {
         },
         trigger
       );
-
-      console.log('Notification scheduled successfully for:', new Date(timestamp));
     } catch (error) {
-      console.error('Error scheduling notification:', error);
       throw error;
     }
   }
@@ -93,18 +88,14 @@ class NotificationService {
   async cancelNotification(id: string): Promise<void> {
     try {
       await notifee.cancelNotification(id);
-      console.log('Notification cancelled:', id);
     } catch (error) {
-      console.error('Error cancelling notification:', error);
     }
   }
 
   async cancelAllNotifications(): Promise<void> {
     try {
       await notifee.cancelAllNotifications();
-      console.log('All notifications cancelled');
     } catch (error) {
-      console.error('Error cancelling all notifications:', error);
     }
   }
 
@@ -113,7 +104,6 @@ class NotificationService {
       const notifications = await notifee.getTriggerNotifications();
       return notifications;
     } catch (error) {
-      console.error('Error getting trigger notifications:', error);
       return [];
     }
   }

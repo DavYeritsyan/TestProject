@@ -91,7 +91,7 @@ const AddReminder = () => {
                 textAlignVertical="top"
               />
               <View style={styles.dateTimeContainer}>
-                <Text style={styles.dateTimeLabel}>Reminder Time (Optional)</Text>
+                <Text style={styles.dateTimeLabel}>Reminder Time <Text style={styles.requiredStar}>*</Text></Text>
                 <View style={styles.dateTimeButtons}>
                   <TouchableOpacity
                     style={styles.dateTimeButton}
@@ -158,9 +158,9 @@ const AddReminder = () => {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.modalButton, styles.saveButton, loading && styles.saveButtonDisabled]}
+                  style={[styles.modalButton, styles.saveButton, (loading || !title.trim() || !reminderDate) && styles.saveButtonDisabled]}
                   onPress={handleAddReminder}
-                  disabled={loading}
+                  disabled={loading || !title.trim() || !reminderDate}
                   activeOpacity={0.7}>
                   <Text style={styles.saveButtonText}>
                     {loading ? 'Saving...' : 'Save'}
@@ -487,6 +487,10 @@ const styles = StyleSheet.create({
   },
   timingOptionTextActive: {
     color: '#6366F1',
+  },
+  requiredStar: {
+    color: '#DC2626',
+    fontSize: 14,
   },
 });
 

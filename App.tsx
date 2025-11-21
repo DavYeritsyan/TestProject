@@ -1,65 +1,32 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { StatusBar, useColorScheme, ActivityIndicator, View, StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
-import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import AppNavigator from './src/navigation/AppNavigator';
 import AuthNavigation from './src/navigation/AuthNavigation';
 import notificationService from './src/services/notificationService';
-import notifee from '@notifee/react-native';
+import { useAuthState, useNotificationHandler } from './src/hooks';
+
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
-  const [initializing, setInitializing] = useState(true);
-  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
-
-  useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged((currentUser) => {
-      setUser(currentUser);
-      if (initializing) {
-        setInitializing(false);
-      }
-    });
-
-    return unsubscribe;
-  }, [initializing]);
+  
+  const { user, initializing, isAuthenticated } = useAuthState();
+  
+  useNotificationHandler(navigationRef, isAuthenticated);
 
   useEffect(() => {
     notificationService.initialize();
   }, []);
 
-  useEffect(() => {
-    const checkInitialNotification = async () => {
-      const initialNotification = await notifee.getInitialNotification();
-      
-      if (initialNotification && user) {
-        const reminderId = initialNotification.notification.data?.reminderId;
-        
-        if (reminderId && typeof reminderId === 'string') {
-          const timer = setTimeout(() => {
-            if (navigationRef.current?.isReady()) {
-              navigationRef.current.navigate('Reminders', { reminderId });
-            }
-          }, 1500);
-          return () => clearTimeout(timer);
-        }
-      }
-    };
-
-    if (!initializing && user) {
-      checkInitialNotification();
-    }
-  }, [initializing, user]);
-
   if (initializing) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color="#6366F1" />
       </View>
     );
   }
-
 
   return (
     <SafeAreaProvider>

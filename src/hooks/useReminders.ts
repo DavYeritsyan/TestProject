@@ -1,7 +1,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Platform } from 'react-native';
 import { useRemindersStore } from '../stores/remindersStore';
+import { useNotificationStore } from '../stores/notificationStore';
 import { CATEGORIES, DEFAULT_CATEGORY } from '../constants';
+import { ReminderItem } from '../types';
 
 export const useReminders = () => {
   const {
@@ -24,6 +26,11 @@ export const useReminders = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [notifyMinutesBefore, setNotifyMinutesBefore] = useState<number>(0);
+
+  const [selectedReminder, setSelectedReminder] = useState<ReminderItem | null>(null);
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  
+  const markAsProcessed = useNotificationStore(state => state.markAsProcessed);
 
   useEffect(() => {
     const unsubscribe = subscribeToReminders();
@@ -95,9 +102,17 @@ export const useReminders = () => {
   };
 
   const handleAddReminder = async () => {
+    if (!title.trim()) {
+      return;
+    }
+    
+    if (!reminderDate) {
+      return;
+    }
+    
     let notificationDate = reminderDate;
     
-    if (reminderDate && notifyMinutesBefore > 0) {
+    if (notifyMinutesBefore > 0) {
       notificationDate = new Date(reminderDate.getTime() - (notifyMinutesBefore * 60 * 1000));
     }
     
@@ -190,6 +205,25 @@ export const useReminders = () => {
     setNotifyMinutesBefore(0);
   };
 
+  const handleReminderPress = (item: ReminderItem) => {
+    setSelectedReminder(item);
+    setDetailModalVisible(true);
+  };
+
+  const handleCloseDetailModal = () => {
+    setDetailModalVisible(false);
+    setSelectedReminder(null);
+  };
+
+  const handleNotificationPress = (reminderId: string) => {
+    const reminder = reminders.find(r => r.id === reminderId);
+    if (reminder) {
+      setSelectedReminder(reminder);
+      setDetailModalVisible(true);
+      markAsProcessed(reminderId);
+    }
+  };
+
   return {
     reminders,
     filteredReminders,
@@ -225,5 +259,10 @@ export const useReminders = () => {
     handleTimeChange,
     formatDateTime,
     clearDateTime,
+    selectedReminder,
+    detailModalVisible,
+    handleReminderPress,
+    handleCloseDetailModal,
+    handleNotificationPress,
   };
 };

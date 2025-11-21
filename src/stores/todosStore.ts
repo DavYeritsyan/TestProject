@@ -128,7 +128,6 @@ export const useTodosStore = create<TodosState>((set, get) => ({
           set({ todos: todosData });
         },
         (err) => {
-          console.error('Error fetching todos:', err);
           set({ error: 'Failed to fetch todos' });
         }
       );

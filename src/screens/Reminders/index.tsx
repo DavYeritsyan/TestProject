@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { View, Text, FlatList, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { AddReminder, ReminderDetailModal } from './components';
 import ReminderItem from './components/ReminderItem';
 import { useReminders } from '../../hooks';
-import { ReminderItem as ReminderItemType } from '../../types';
 import { useRoute, RouteProp, useFocusEffect, useNavigation } from '@react-navigation/native';
-import notifee, { EventType } from '@notifee/react-native';
 
 type RemindersScreenRouteProp = RouteProp<{ Reminders: { reminderId?: string } }, 'Reminders'>;
 
@@ -20,49 +18,24 @@ const RemindersScreen = () => {
     setSearchQuery,
     selectedFilter,
     setSelectedFilter,
-    loading
+    loading,
+    selectedReminder,
+    detailModalVisible,
+    handleReminderPress,
+    handleCloseDetailModal,
+    handleNotificationPress,
   } = useReminders();
-
-  const [selectedReminder, setSelectedReminder] = useState<ReminderItemType | null>(null);
-  const [modalVisible, setModalVisible] = useState(false);
 
   useFocusEffect(
     React.useCallback(() => {
-      if (route.params?.reminderId && reminders.length > 0) {
-        const reminder = reminders.find(r => r.id === route.params.reminderId);
-        if (reminder) {
-          setSelectedReminder(reminder);
-          setModalVisible(true);
-        }
+      const reminderId = route.params?.reminderId;
+      
+      if (reminderId && reminders.length > 0) {
+        handleNotificationPress(reminderId);
+        (navigation as any).setParams({ reminderId: undefined });
       }
-    }, [route.params, reminders])
+    }, [route.params, reminders, handleNotificationPress, navigation])
   );
-
-  useEffect(() => {
-    return notifee.onForegroundEvent(({ type, detail }) => {
-      if (type === EventType.PRESS && detail.notification?.id) {
-        const reminderId = detail.notification.id;
-        const reminder = reminders.find(r => r.id === reminderId);
-        if (reminder) {
-          setSelectedReminder(reminder);
-          setModalVisible(true);
-        }
-      }
-    });
-  }, [reminders]);
-
-  const handleReminderPress = (item: ReminderItemType) => {
-    setSelectedReminder(item);
-    setModalVisible(true);
-  };
-
-  const handleCloseModal = () => {
-    setModalVisible(false);
-    setSelectedReminder(null);
-    if (route.params?.reminderId) {
-      (navigation as any).setParams({ reminderId: undefined });
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -170,9 +143,9 @@ const RemindersScreen = () => {
       )}
 
       <ReminderDetailModal
-        visible={modalVisible}
+        visible={detailModalVisible}
         reminder={selectedReminder}
-        onClose={handleCloseModal}
+        onClose={handleCloseDetailModal}
       />
     </View>
   );
