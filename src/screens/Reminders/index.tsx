@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { AddReminder } from './components';
+import { AddReminder, ReminderDetailModal } from './components';
 import ReminderItem from './components/ReminderItem';
 import { useReminders } from '../../hooks';
+import { ReminderItem as ReminderItemType } from '../../types';
+import { useRoute, RouteProp, useFocusEffect, useNavigation } from '@react-navigation/native';
+import notifee, { EventType } from '@notifee/react-native';
+
+type RemindersScreenRouteProp = RouteProp<{ Reminders: { reminderId?: string } }, 'Reminders'>;
 
 const RemindersScreen = () => {
+  const route = useRoute<RemindersScreenRouteProp>();
+  const navigation = useNavigation();
   const {
     reminders,
     filteredReminders,
@@ -15,6 +22,47 @@ const RemindersScreen = () => {
     setSelectedFilter,
     loading
   } = useReminders();
+
+  const [selectedReminder, setSelectedReminder] = useState<ReminderItemType | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (route.params?.reminderId && reminders.length > 0) {
+        const reminder = reminders.find(r => r.id === route.params.reminderId);
+        if (reminder) {
+          setSelectedReminder(reminder);
+          setModalVisible(true);
+        }
+      }
+    }, [route.params, reminders])
+  );
+
+  useEffect(() => {
+    return notifee.onForegroundEvent(({ type, detail }) => {
+      if (type === EventType.PRESS && detail.notification?.id) {
+        const reminderId = detail.notification.id;
+        const reminder = reminders.find(r => r.id === reminderId);
+        if (reminder) {
+          setSelectedReminder(reminder);
+          setModalVisible(true);
+        }
+      }
+    });
+  }, [reminders]);
+
+  const handleReminderPress = (item: ReminderItemType) => {
+    setSelectedReminder(item);
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setSelectedReminder(null);
+    if (route.params?.reminderId) {
+      (navigation as any).setParams({ reminderId: undefined });
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -49,7 +97,6 @@ const RemindersScreen = () => {
 
             {reminders.length > 0 && (
               <View style={styles.searchContainer}>
-                <Text style={styles.searchIcon}>🔍</Text>
                 <TextInput
                   style={styles.searchInput}
                   placeholder="Search reminders..."
@@ -59,7 +106,7 @@ const RemindersScreen = () => {
                 />
                 {searchQuery.length > 0 && (
                   <TouchableOpacity onPress={() => setSearchQuery('')}>
-                    <Text style={styles.clearButton}>✕</Text>
+                    <Text style={styles.clearButton}>×</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -89,17 +136,15 @@ const RemindersScreen = () => {
 
           {filteredReminders.length === 0 && reminders.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyIcon}>📝</Text>
               <Text style={styles.emptyText}>No reminders yet</Text>
               <Text style={styles.emptySubtext}>Create your first reminder to get started!</Text>
               <View style={styles.emptyTips}>
-                <Text style={styles.tipText}>💡 Tip: Use keywords like "work", "urgent", or "personal"</Text>
+                <Text style={styles.tipText}>Tip: Use keywords like "work", "urgent", or "personal"</Text>
               </View>
             </View>
           ) : filteredReminders.length === 0 ? (
 
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyIcon}>🔍</Text>
               <Text style={styles.emptyText}>No matches found</Text>
               <Text style={styles.emptySubtext}>Try adjusting your search or filters</Text>
             </View>
@@ -113,7 +158,9 @@ const RemindersScreen = () => {
               <FlatList
                 data={filteredReminders}
                 keyExtractor={(item) => item.id}
-                renderItem={({ item }) => <ReminderItem item={item} />}
+                renderItem={({ item }) => (
+                  <ReminderItem item={item} onPress={handleReminderPress} />
+                )}
                 contentContainerStyle={styles.listContainer}
                 showsVerticalScrollIndicator={false}
               />
@@ -121,6 +168,12 @@ const RemindersScreen = () => {
           )}
         </>
       )}
+
+      <ReminderDetailModal
+        visible={modalVisible}
+        reminder={selectedReminder}
+        onClose={handleCloseModal}
+      />
     </View>
   );
 };
@@ -156,38 +209,36 @@ const styles = StyleSheet.create({
   },
   statsContainer: {
     flexDirection: 'row',
+    justifyContent: 'space-evenly',
     paddingHorizontal: 20,
     paddingVertical: 12,
-    gap: 12,
   },
   statCard: {
-    flex: 1,
+    width: 90,
+    height: 90,
     backgroundColor: '#F9FAFB',
-    padding: 16,
-    borderRadius: 16,
+    borderRadius: 45,
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 2,
   },
   statCardTotal: {
     borderColor: '#6366F1',
-    backgroundColor: '#EEF2FF',
   },
   statCardWork: {
     borderColor: '#F59E0B',
-    backgroundColor: '#FEF3C7',
   },
   statCardPersonal: {
     borderColor: '#10B981',
-    backgroundColor: '#D1FAE5',
   },
   statNumber: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '700',
     color: '#1F2937',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
     color: '#6B7280',
     textTransform: 'uppercase',
@@ -203,10 +254,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 2,
     borderColor: '#E5E7EB',
-  },
-  searchIcon: {
-    fontSize: 18,
-    marginRight: 8,
   },
   searchInput: {
     flex: 1,
@@ -267,10 +314,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 40,
   },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
   emptyText: {
     fontSize: 22,
     fontWeight: '600',
@@ -285,14 +328,14 @@ const styles = StyleSheet.create({
   emptyTips: {
     marginTop: 24,
     padding: 16,
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#e0dfdbff',
     borderRadius: 12,
     borderLeftWidth: 4,
-    borderLeftColor: '#F59E0B',
+    borderLeftColor: '#5b7eddff',
   },
   tipText: {
     fontSize: 14,
-    color: '#92400E',
+    color: 'black',
     textAlign: 'center',
   },
 });

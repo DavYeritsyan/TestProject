@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import { ReminderItem } from '../types';
+import notificationService from '../services/notificationService';
 
 const REMINDERS_COLLECTION = 'reminders';
 
@@ -16,15 +17,13 @@ interface RemindersState {
   error: string | null;
   unsubscribe: (() => void) | null;
   
-  // Actions
   setReminders: (reminders: ReminderItem[]) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   clearError: () => void;
   reset: () => void;
   
-  // Firestore operations
-  addReminder: (title: string, description: string) => Promise<{ success: boolean; error?: string }>;
+  addReminder: (title: string, description: string, reminderDate?: Date) => Promise<{ success: boolean; error?: string }>;
   deleteReminder: (id: string) => Promise<{ success: boolean; error?: string }>;
   subscribeToReminders: () => () => void;
 }
@@ -47,7 +46,7 @@ export const useRemindersStore = create<RemindersState>((set, get) => ({
     set({ reminders: [], loading: false, error: null, unsubscribe: null });
   },
 
-  addReminder: async (title: string, description: string) => {
+  addReminder: async (title: string, description: string, reminderDate?: Date) => {
     const user = auth().currentUser;
     if (!user) {
       const error = 'User not authenticated';
@@ -65,12 +64,28 @@ export const useRemindersStore = create<RemindersState>((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      await firestore().collection(REMINDERS_COLLECTION).add({
+      const reminderData: any = {
         title: trimmedTitle,
         description: description.trim(),
         userId: user.uid,
         createdAt: firestore.FieldValue.serverTimestamp(),
-      });
+      };
+
+      if (reminderDate) {
+        reminderData.reminderDate = reminderDate.getTime();
+      }
+
+      const docRef = await firestore().collection(REMINDERS_COLLECTION).add(reminderData);
+      if (reminderDate && docRef.id) {
+        const timestamp = reminderDate.getTime();
+        await notificationService.scheduleNotification(
+          docRef.id,
+          trimmedTitle,
+          description.trim() || 'Reminder notification',
+          timestamp
+        );
+      }
+
       set({ loading: false });
       return { success: true };
     } catch (err: any) {
@@ -84,6 +99,7 @@ export const useRemindersStore = create<RemindersState>((set, get) => ({
     set({ loading: true, error: null });
 
     try {
+      await notificationService.cancelNotification(id);
       await firestore().collection(REMINDERS_COLLECTION).doc(id).delete();
       set({ loading: false });
       return { success: true };

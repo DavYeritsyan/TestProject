@@ -34,7 +34,6 @@ const AddTodo = () => {
   return (
     <View style={styles.inputContainer}>
       <View style={styles.inputWrapper}>
-        <Text style={styles.inputIcon}>✏️</Text>
         <TextInput
           style={styles.input}
           placeholder="What needs to be done?"
@@ -82,10 +81,6 @@ const styles = StyleSheet.create({
     elevation: 3,
     borderWidth: 1,
     borderColor: '#E5E7EB',
-  },
-  inputIcon: {
-    fontSize: 20,
-    marginRight: 8,
   },
   input: {
     flex: 1,

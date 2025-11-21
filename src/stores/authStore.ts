@@ -9,14 +9,12 @@ interface AuthState {
   error: string | null;
   success: boolean;
   
-  // Actions
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   setSuccess: (success: boolean) => void;
   clearError: () => void;
   resetSuccess: () => void;
   
-  // Auth operations
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   register: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<{ success: boolean; error?: string }>;

@@ -16,14 +16,12 @@ interface TodosState {
   error: string | null;
   unsubscribe: (() => void) | null;
   
-  // Actions
   setTodos: (todos: TodoItem[]) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   clearError: () => void;
   reset: () => void;
   
-  // Firestore operations
   addTodo: (text: string) => Promise<{ success: boolean; error?: string }>;
   updateTodo: (id: string, completed: boolean) => Promise<{ success: boolean; error?: string }>;
   deleteTodo: (id: string) => Promise<{ success: boolean; error?: string }>;

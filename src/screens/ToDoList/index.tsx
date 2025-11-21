@@ -11,7 +11,6 @@ const TodoListScreen = () => {
       <AddTodo />
       {todos.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>📝</Text>
           <Text style={styles.emptyText}>No tasks yet</Text>
           <Text style={styles.emptySubtext}>Create your first task to get started</Text>
         </View>
@@ -50,10 +49,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 40,
-  },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: 16,
   },
   emptyText: {
     fontSize: 22,

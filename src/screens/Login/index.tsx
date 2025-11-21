@@ -86,7 +86,7 @@ const LoginScreen: React.FC = () => {
 
           {error && (
             <View style={styles.errorContainer}>
-              <Text style={styles.errorBanner}>⚠️ {error}</Text>
+              <Text style={styles.errorBanner}>{error}</Text>
             </View>
           )}
 

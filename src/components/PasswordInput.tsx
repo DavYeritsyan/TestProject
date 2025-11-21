@@ -50,7 +50,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
           style={styles.eyeButton}
           onPress={() => setShowPassword(!showPassword)}>
           <Text style={styles.eyeText}>
-            {showPassword ? '👁️' : '👁️‍🗨️'}
+            {showPassword ? 'Hide' : 'Show'}
           </Text>
         </TouchableOpacity>
       </View>

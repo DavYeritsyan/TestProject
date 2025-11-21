@@ -1,25 +1,12 @@
 import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { ReminderItem as ReminderItemType } from '../../../types';
 import { useReminders } from '../../../hooks';
-import { CATEGORIES, DEFAULT_CATEGORY } from '../../../constants';
+import { ReminderItemProps } from '../../../types';
 
-interface ReminderItemProps {
-  item: ReminderItemType;
-}
 
-const detectCategory = (title: string, description: string) => {
-  const text = (title + ' ' + description).toLowerCase();
-  
-  const category = CATEGORIES.find(cat => 
-    cat.keywords.some(keyword => text.includes(keyword))
-  );
-  
-  return category || DEFAULT_CATEGORY;
-};
 
-const ReminderItem: React.FC<ReminderItemProps> = ({ item }) => {
-  const { deleteReminder, error, clearError } = useReminders();
+const ReminderItem: React.FC<ReminderItemProps> = ({ item, onPress }) => {
+  const { deleteReminder, error, clearError, detectCategory } = useReminders();
   const category = detectCategory(item.title, item.description);
 
   useEffect(() => {
@@ -46,10 +33,12 @@ const ReminderItem: React.FC<ReminderItemProps> = ({ item }) => {
   };
 
   return (
-    <View style={[styles.reminderItem, { borderLeftColor: category.color }]}>
+    <TouchableOpacity 
+      style={[styles.reminderItem, { borderLeftColor: category.color }]}
+      onPress={() => onPress(item)}
+      activeOpacity={0.8}>
       <View style={styles.topRow}>
         <View style={[styles.categoryBadge, { backgroundColor: category.bg }]}>
-          <Text style={styles.categoryIcon}>{category.icon}</Text>
           <Text style={[styles.categoryText, { color: category.color }]}>
             {category.label}
           </Text>
@@ -81,7 +70,7 @@ const ReminderItem: React.FC<ReminderItemProps> = ({ item }) => {
           <Text style={styles.deleteButtonText}>×</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

@@ -14,7 +14,7 @@ const AppNavigator = () => {
 
   const handleLogout = () => {
     Alert.alert(
-      '👋 Logout',
+      'Logout',
       'Are you sure you want to log out?\nYou can always come back anytime!',
       [
         {
@@ -30,7 +30,7 @@ const AppNavigator = () => {
             } catch (error) {
               console.error('Error signing out:', error);
               Alert.alert(
-                '⚠️ Oops!',
+                'Oops!',
                 'Something went wrong while logging out.\nPlease check your connection and try again.',
                 [{ text: 'Got it', style: 'default' }]
               );
